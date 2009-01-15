@@ -170,8 +170,13 @@ IF IsDir(CPUFreqPath) THEN
    IF ERROR THEN ERROR_exit(0, TRUE, "", CPUFreqPath &/ "scaling_min_freq")
    ' Get scaling_available_frequencies
    Global.AvailableFreqs.Clear
-   TRY Global.AvailableFreqs = Split(Utils.FileReadLine(CPUFreqPath &/ "scaling_available_frequencies"), " ", "")
-   IF ERROR THEN ERROR_exit(0, TRUE, "", CPUFreqPath &/ "scaling_available_frequencies")
+   IF Exist(CPUFreqPath &/ "scaling_available_frequencies") THEN
+      TRY Global.AvailableFreqs = Split(Utils.FileReadLine(CPUFreqPath &/ "scaling_available_frequencies"), " ", "")
+      IF ERROR THEN ERROR_exit(0, TRUE, "", CPUFreqPath &/ "scaling_available_frequencies")
+   ELSE
+      Global.AvailableFreqs.Add(Global.vCPUFreqMin)
+      Global.AvailableFreqs.Add(Global.vCPUFreqMax)
+   ENDIF
 
    ' START: Need to clean up empty positions due to gambas1 split()...
    FOR n = 0 TO Global.AvailableFreqs.Max

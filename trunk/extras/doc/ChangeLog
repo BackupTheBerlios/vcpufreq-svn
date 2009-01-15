@@ -1,3 +1,12 @@
+2009-01-15   <joe1962@users.berlios.de>
+
+	* Released 2.0.2
+
+2009-01-15   <joe1962@users.sourceforge.net>
+
+	* If no available_freqs, use maxfreq and minfreq for freqs dropdown.
+	* Prioritize gksu over kdesu.
+
 2008-12-13   <joe1962@users.berlios.de>
 
 	* Released 2.0.0

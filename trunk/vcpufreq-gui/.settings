@@ -15,10 +15,10 @@ SearchComment=False
 SearchString=True
 
 [OpenFile]
-File[1]="Utils.module:39.0"
+File[1]="Utils.module:173.104"
 Active=1
-File[2]="Main.module:4.0"
-File[3]="FMain.class:186.51"
+File[2]="Main.module:14.0"
+File[3]="FMain.class:65.37"
 File[4]="Global.class:15.46"
 File[5]="FMain.form"
 Count=5

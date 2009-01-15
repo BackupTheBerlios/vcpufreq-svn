@@ -1,9 +1,9 @@
 # Gambas Project File 2.0
-# Compiled with Gambas 2.9.0
+# Compiled with Gambas 2.10.2
 Title=vcpufreq
 Startup=Main
 Icon=vcpufreq.png
-Version=2.0.1
+Version=2.0.3
 Library=gb.qt
 Library=gb.settings
 TabSize=3
