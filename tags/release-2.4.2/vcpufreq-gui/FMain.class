@@ -1,0 +1,284 @@
+' Gambas class file
+
+PUBLIC SUB _new()
+
+ME.Center
+Global.AvailableGovs = NEW String[]
+Global.AvailableFreqs = NEW String[]
+Global.AvailableFreqsPretty = NEW String[]
+Global.txtScalingSetSpeed = NEW String[]
+END
+
+
+PUBLIC SUB Form_Open()
+
+ME.Title = Application.Name & " " & Application.Version
+
+' Set up possible scaling governors (up to date for kernel 2.6.32.3):
+Global.AvailableGovs.Clear
+Global.AvailableGovs.Add("userspace")
+Global.AvailableGovs.Add("performance")
+Global.AvailableGovs.Add("powersave")
+Global.AvailableGovs.Add("ondemand")
+Global.AvailableGovs.Add("conservative")
+
+'Get number of CPUs:
+Global.vCPUCount = Utils.CPUCount()
+FMain.txtNumCPUs.Text = Global.vCPUCount
+GridView1.Columns.Count = 2
+GridView1.Rows.Count = Global.vCPUCount + 1
+'GridView1.Rows.Count = 64
+GridView1.Columns[0].Width = 48
+GridView1[0, 0].Alignment = Align.Center
+GridView1[0, 1].Alignment = Align.Center
+GridView1[0, 0].Text = "CPU"
+GridView1[0, 1].Text = "Frequency"
+GridView1[0, 0].Background = Color.RGB(191, 255, 191)
+GridView1[0, 1].Background = Color.RGB(191, 255, 191)
+
+'Check for MultiCPUs handling:
+Global.vCPUMulti = Utils.CheckMultiCPUs()
+
+'Need to read config to vars first, then check for "Load on start":
+Utils.ReadConfig     ' Load global vars from ini.
+' IF Global.vLoadOnStart = TRUE THEN
+'    Utils.SetConfig("cpu0")
+' ELSE
+'    Global.vSaveOnExit = FALSE
+'    Global.vLoadOnStart = FALSE
+'    Global.vCPUFreqLoad = FALSE
+'    Global.vAutoRefreshRate = "manual"
+' ENDIF
+Utils.GetConfig("cpu0")    ' Get config from hardware.
+LoadConfig                 ' Load combos.
+RefreshWindow              ' Refresh on-screen info.
+END
+
+
+PUBLIC SUB LoadConfig()
+' Load config to combos:
+DIM n AS Integer
+DIM strTemp AS String
+
+' Reset Scaling Freqs combo boxes:
+cmbScalingSetSpeed.Clear
+cmbScalingMaxFreq.Clear
+cmbScalingMinFreq.Clear
+
+' Load scaling governors to combo:
+cmbScalingGovernor.Enabled = FALSE
+cmbScalingGovernor.Clear
+FOR n = 0 TO Global.AvailableGovs.Max
+   cmbScalingGovernor.Add(Global.AvailableGovs[n])
+NEXT
+IF Global.root = TRUE THEN cmbScalingGovernor.Enabled = TRUE
+IF Global.vScalingDriver <> "UNAVAILABLE" THEN
+   ' Enable cpu-freq combos:
+   IF Global.root = TRUE THEN cmbScalingGovernor.Enabled = TRUE
+   IF Global.root = TRUE THEN cmbScalingMaxFreq.Enabled = TRUE
+   IF Global.root = TRUE THEN cmbScalingMinFreq.Enabled = TRUE
+   ' Set up Scaling Freqs. combos:
+   cmbScalingSetSpeed.Enabled = FALSE
+   FOR n = 0 TO Global.AvailableFreqs.Max
+      strTemp = Utils.AutoUnitsFreq(Global.AvailableFreqs[n])
+      Global.AvailableFreqsPretty.Add(strTemp)
+      cmbScalingSetSpeed.Add(strTemp)
+      IF Utils.AutoUnitsFreqRev(strTemp) = Global.vCPUFreq THEN cmbScalingSetSpeed.Tag = cmbScalingSetSpeed.Count - 1
+      cmbScalingMaxFreq.Add(strTemp)
+      IF Utils.AutoUnitsFreqRev(strTemp) = Global.vCPUFreqMaxLimit THEN cmbScalingMaxFreq.Tag = cmbScalingMaxFreq.Count - 1
+      cmbScalingMinFreq.Add(strTemp)
+      IF Utils.AutoUnitsFreqRev(strTemp) = Global.vCPUFreqMinLimit THEN cmbScalingMinFreq.Tag = cmbScalingMinFreq.Count - 1
+   NEXT
+
+   'Fix for empty tag situations:
+   IF cmbScalingSetSpeed.Tag = "" THEN
+      cmbScalingSetSpeed.Tag = 0
+   ENDIF
+   IF cmbScalingMaxFreq.Tag = "" THEN
+      cmbScalingMaxFreq.Tag = 0
+   ENDIF
+   IF cmbScalingMinFreq.Tag = "" THEN
+      cmbScalingMinFreq.Tag = cmbScalingMinFreq.Count - 1
+   ENDIF
+
+   ' Sync Scaling Freqs. combos:
+   cmbScalingSetSpeed.Index = cmbScalingSetSpeed.Tag
+   IF Global.root = TRUE THEN cmbScalingSetSpeed.Enabled = TRUE
+   cmbScalingMaxFreq.Index = cmbScalingMaxFreq.Tag
+   cmbScalingMinFreq.Index = cmbScalingMinFreq.Tag
+   ' Enable cpu-freq combo for userspace governor:
+   IF txtScalingGovernor.Text = "userspace" THEN
+      IF Global.root = TRUE THEN cmbScalingSetSpeed.Enabled = TRUE
+   ELSE
+      cmbScalingSetSpeed.Enabled = FALSE
+   ENDIF
+   ' Sync combos text:
+   FMain.cmbScalingGovernor.Index = FMain.cmbScalingGovernor.Find(Global.vScalingGov)
+   ' FMain.cmbScalingSetSpeed.Index = FMain.cmbScalingSetSpeed.Find(Global.vCPUFreq)
+   ' FMain.cmbScalingMaxFreq.Index = FMain.cmbScalingMaxFreq.Find(Global.vCPUFreqMaxLimit)
+   ' FMain.cmbScalingMinFreq.Index = FMain.cmbScalingMinFreq.Find(Global.vCPUFreqMinLimit)
+   FMain.cmbAutoRefresh.Index = FMain.cmbAutoRefresh.Find(Global.vAutoRefreshRate)
+   IF Global.vLoadOnStart = 0 THEN 
+      FMain.cmbLoadOnBoot.Index = 1
+   ELSE 
+      FMain.cmbLoadOnBoot.Index = 0
+   ENDIF
+
+ELSE
+   ' No scaling_driver:
+   txtScalingDriver.Text = Global.vScalingDriver
+   ' Disable cpu-freq combos:
+   cmbScalingGovernor.Enabled = FALSE
+   cmbScalingSetSpeed.Enabled = FALSE
+   cmbScalingMaxFreq.Enabled = FALSE
+   cmbScalingMinFreq.Enabled = FALSE
+ENDIF
+
+END
+
+
+PUBLIC SUB RefreshWindow()
+
+FMain.txtScalingDriver.Text = Global.vScalingDriver
+FMain.txtScalingGovernor.Text = Global.vScalingGov
+FMain.cmbScalingGovernor.Index = FMain.cmbScalingGovernor.Find(Global.vScalingGov)
+Utils.CPUFreq_Refresh
+FMain.txtCPUMaxFreq.Text = Utils.AutoUnitsFreq(Global.vCPUFreqMax)
+FMain.txtCPUMinFreq.Text = Utils.AutoUnitsFreq(Global.vCPUFreqMin)
+FMain.txtScalingMaxFreq.Text = Utils.AutoUnitsFreq(Global.vCPUFreqMaxLimit)
+FMain.txtScalingMinFreq.Text = Utils.AutoUnitsFreq(Global.vCPUFreqMinLimit)
+END
+
+
+PUBLIC SUB butRefresh_Click()
+
+FMain.txtNumCPUs.Text = Utils.CPUCount()
+Utils.GetConfig("cpu0")
+RefreshWindow
+END
+
+
+PUBLIC SUB cmbScalingGovernor_Click()
+DIM n AS Integer
+DIM CPUFreqPath AS String
+DIM retBool AS Boolean
+
+IF cmbScalingGovernor.Text <> "" AND cmbScalingGovernor.Text <> txtScalingGovernor.Text THEN
+   txtScalingGovernor.Text = Utils.setScalingGovernor(cmbScalingGovernor.Text)
+   ' Check for scaling_governor change:
+   IF txtScalingGovernor.Text <> cmbScalingGovernor.Text THEN
+      message.Warning("Unable to set desired scaling governor..." & gb.NewLine & "try modprobing corresponding governor module:" & gb.NewLine & gb.NewLine & "# modprobe cpufreq_" & cmbScalingGovernor.Text)
+   ENDIF
+   ' Sync scaling_governor combo:
+   cmbScalingGovernor.Index = cmbScalingGovernor.Find(txtScalingGovernor.Text)
+   Global.vScalingGov = cmbScalingGovernor.Text
+   ' Refresh scaling_cur_freq:
+   Utils.CPUFreq_Refresh
+   ' Check for set scaling speed availability:
+   IF txtScalingGovernor.Text = "userspace" THEN
+      IF Global.root = TRUE THEN cmbScalingSetSpeed.Enabled = TRUE
+      cmbScalingSetSpeed_Click
+   ELSE
+      cmbScalingSetSpeed.Enabled = FALSE
+   ENDIF
+ENDIF
+END
+
+
+PUBLIC SUB cmbScalingSetSpeed_Click()
+
+IF cmbScalingSetSpeed.Enabled = TRUE THEN
+   Utils.setScalingSetSpeed(Global.AvailableFreqs[cmbScalingSetSpeed.Index])
+ENDIF
+END
+
+
+PUBLIC SUB cmbScalingMaxFreq_Click()
+
+IF cmbScalingMaxFreq.Text <> txtScalingMaxFreq.Text THEN
+   txtScalingMaxFreq.Text = Utils.setScalingMaxFreq(Global.AvailableFreqs[cmbScalingMaxFreq.Index])
+   ' Refresh scaling_max_freq:
+   Utils.CPUFreq_Refresh
+ENDIF
+END
+
+
+PUBLIC SUB cmbScalingMinFreq_Click()
+
+IF cmbScalingMinFreq.Text <> txtScalingMinFreq.Text THEN
+   txtScalingMinFreq.Text = Utils.setScalingMinFreq(Global.AvailableFreqs[cmbScalingMinFreq.Index])
+   ' Refresh scaling_min_freq:
+   Utils.CPUFreq_Refresh
+ENDIF
+END
+
+
+PUBLIC SUB cmbAutoRefresh_Click()
+
+SELECT CASE cmbAutoRefresh.Index
+CASE 0
+   Timer1.Enabled = FALSE
+   Timer1.Delay = 0
+CASE 1
+   Timer1.Delay = 1000
+   Timer1.Enabled = TRUE
+CASE 2
+   Timer1.Delay = 2000
+   Timer1.Enabled = TRUE
+CASE 3
+   Timer1.Delay = 5000
+   Timer1.Enabled = TRUE
+CASE 4
+   Timer1.Delay = 10000
+   Timer1.Enabled = TRUE
+CASE 5
+   Timer1.Delay = 15000
+   Timer1.Enabled = TRUE
+CASE 6
+   Timer1.Delay = 20000
+   Timer1.Enabled = TRUE
+CASE 7
+   Timer1.Delay = 30000
+   Timer1.Enabled = TRUE
+CASE 8
+   Timer1.Delay = 60000
+   Timer1.Enabled = TRUE
+CASE 9
+   Timer1.Delay = 300000
+   Timer1.Enabled = TRUE
+END SELECT
+
+IF cmbAutoRefresh.Index = 0 THEN
+   butRefresh.Enabled = TRUE
+ELSE
+   butRefresh.Enabled = FALSE
+ENDIF
+END
+
+
+PUBLIC SUB Timer1_Timer()
+
+butRefresh_Click
+
+END
+
+
+PUBLIC SUB Form_Close()
+
+Utils.WriteConfig
+' bye bye...:
+
+END
+
+
+PUBLIC SUB butExit_Click()
+
+Utils.WriteConfig
+
+' bye bye...:
+ME.Close
+
+END
+
+
+

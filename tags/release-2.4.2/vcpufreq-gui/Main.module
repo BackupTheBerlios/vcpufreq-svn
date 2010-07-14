@@ -1,0 +1,44 @@
+' Gambas module file
+
+PUBLIC SUB Main()
+DIM Ret AS String
+
+IF System.User.Id <> 0 THEN
+   EXEC ["which", "gksu"] TO Ret
+   IF InStr(Ret, "gksu") THEN
+      EXEC ["gksu", Application.Path &/ "vcpufreq.gambas"]
+   ELSE
+      EXEC ["which", "kdesu"] TO Ret
+      IF InStr(Ret, "kdesu") THEN
+         EXEC ["kdesu", Application.Path &/ "vcpufreq.gambas"]
+      ELSE
+         PRINT "No gksu or kdesu available (try vcpufreq in a root terminal)..."
+      ENDIF
+   ENDIF
+   QUIT
+
+' IF System.User.Name <> "root" THEN
+'    message.Warning("You need to be root to run " & Application.Title & gb.NewLine & "Starting in read-only mode...")
+'    Global.root = FALSE
+'    FMain.cmbScalingGovernor.Enabled = FALSE
+'    FMain.cmbScalingSetSpeed.Enabled = FALSE
+'    FMain.cmbScalingMaxFreq.Enabled = FALSE
+'    FMain.cmbScalingMinFreq.Enabled = FALSE
+'    FMain.chkSaveOnExit.Enabled = FALSE
+'    FMain.chkLoadOnStart.Enabled = FALSE
+'    FMain.chkLoadOnBoot.Enabled = FALSE
+'    FMain.cmbAutoRefresh.Enabled = FALSE
+
+ELSE
+   Global.root = TRUE
+   FMain.cmbScalingGovernor.Enabled = TRUE
+   FMain.cmbScalingSetSpeed.Enabled = TRUE
+   FMain.cmbScalingMaxFreq.Enabled = TRUE
+   FMain.cmbScalingMinFreq.Enabled = TRUE
+   FMain.cmbLoadOnBoot.Enabled = TRUE
+   FMain.cmbAutoRefresh.Enabled = TRUE
+ENDIF
+
+FMain.Show
+
+END

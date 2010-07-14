@@ -1,0 +1,13 @@
+# Gambas Project File 2.0
+# Compiled with Gambas 2.20.2
+Title=vcpufreq
+Startup=Main
+Icon=vcpufreq.png
+Version=2.4.3
+Library=gb.qt
+Library=gb.settings
+TabSize=3
+Translate=1
+Language=en_US
+ControlPublic=1
+ExecPath=/home/joe1962/develop-linux/1-svn/vcpufreq2/trunk/vcpufreq-gui/vcpufreq.gambas
