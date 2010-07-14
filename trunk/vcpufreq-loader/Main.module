@@ -9,7 +9,7 @@ ELSE
    ' Check for vcpufreq-load enabled:
    Utils.ReadConfig
    IF Global.vCPUFreqConfExists = TRUE THEN
-      IF Global.vCPUFreqLoad = TRUE THEN
+      IF Global.vLoadOnStart = TRUE THEN
          ' Load saved cpu-freq config:
          PRINT "vcpufreq-loader enabled in config..."
          Utils.logMessage("vcpufreq-loader enabled in config...")

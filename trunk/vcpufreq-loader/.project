@@ -1,10 +1,12 @@
 # Gambas Project File 2.0
-# Compiled with Gambas 2.9.0
+# Compiled with Gambas 2.20.2
 Title=vcpufreq-loader
 Startup=Main
 Icon=kcmprocessor.png
-Version=2.0.1
+Version=2.4.1
 Library=gb.settings
 TabSize=3
+Translate=1
+Language=en_US
 KeepDebugInfo=1
 ControlPublic=1

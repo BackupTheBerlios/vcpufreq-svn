@@ -6,13 +6,15 @@ ME.Center
 Global.AvailableGovs = NEW String[]
 Global.AvailableFreqs = NEW String[]
 Global.AvailableFreqsPretty = NEW String[]
+Global.txtScalingSetSpeed = NEW String[]
 END
+
 
 PUBLIC SUB Form_Open()
 
 ME.Title = Application.Name & " " & Application.Version
 
-' Set up possible scaling governors (up to date for kernel 2.6.17.7):
+' Set up possible scaling governors (up to date for kernel 2.6.32.3):
 Global.AvailableGovs.Clear
 Global.AvailableGovs.Add("userspace")
 Global.AvailableGovs.Add("performance")
@@ -20,24 +22,38 @@ Global.AvailableGovs.Add("powersave")
 Global.AvailableGovs.Add("ondemand")
 Global.AvailableGovs.Add("conservative")
 
-' Get number of CPUs:
-FMain.txtNumCPUs.Text = Utils.CPUCount()
+'Get number of CPUs:
+Global.vCPUCount = Utils.CPUCount()
+FMain.txtNumCPUs.Text = Global.vCPUCount
+GridView1.Columns.Count = 2
+GridView1.Rows.Count = Global.vCPUCount + 1
+'GridView1.Rows.Count = 64
+GridView1.Columns[0].Width = 48
+GridView1[0, 0].Alignment = Align.Center
+GridView1[0, 1].Alignment = Align.Center
+GridView1[0, 0].Text = "CPU"
+GridView1[0, 1].Text = "Frequency"
+GridView1[0, 0].Background = Color.RGB(191, 255, 191)
+GridView1[0, 1].Background = Color.RGB(191, 255, 191)
 
-' Need to read config to vars first, then check for "Load on start":
+'Check for MultiCPUs handling:
+Global.vCPUMulti = Utils.CheckMultiCPUs()
+
+'Need to read config to vars first, then check for "Load on start":
 Utils.ReadConfig     ' Load global vars from ini.
-IF Global.vLoadOnStart = TRUE THEN
-   Utils.SetConfig("cpu0")
-ELSE
-   Global.vSaveOnExit = FALSE
-   Global.vLoadOnStart = FALSE
-   Global.vCPUFreqLoad = FALSE
-   Global.vAutoRefreshRate = "manual"
-ENDIF
+' IF Global.vLoadOnStart = TRUE THEN
+'    Utils.SetConfig("cpu0")
+' ELSE
+'    Global.vSaveOnExit = FALSE
+'    Global.vLoadOnStart = FALSE
+'    Global.vCPUFreqLoad = FALSE
+'    Global.vAutoRefreshRate = "manual"
+' ENDIF
 Utils.GetConfig("cpu0")    ' Get config from hardware.
 LoadConfig                 ' Load combos.
 RefreshWindow              ' Refresh on-screen info.
-
 END
+
 
 PUBLIC SUB LoadConfig()
 ' Load config to combos:
@@ -74,16 +90,16 @@ IF Global.vScalingDriver <> "UNAVAILABLE" THEN
       IF Utils.AutoUnitsFreqRev(strTemp) = Global.vCPUFreqMinLimit THEN cmbScalingMinFreq.Tag = cmbScalingMinFreq.Count - 1
    NEXT
 
-'Fix for empty tag situations:
-IF cmbScalingSetSpeed.Tag = "" THEN
-   cmbScalingSetSpeed.Tag = 0
-ENDIF
-IF cmbScalingMaxFreq.Tag = "" THEN
-   cmbScalingMaxFreq.Tag = 0
-ENDIF
-IF cmbScalingMinFreq.Tag = "" THEN
-   cmbScalingMinFreq.Tag = cmbScalingMinFreq.Count - 1
-ENDIF
+   'Fix for empty tag situations:
+   IF cmbScalingSetSpeed.Tag = "" THEN
+      cmbScalingSetSpeed.Tag = 0
+   ENDIF
+   IF cmbScalingMaxFreq.Tag = "" THEN
+      cmbScalingMaxFreq.Tag = 0
+   ENDIF
+   IF cmbScalingMinFreq.Tag = "" THEN
+      cmbScalingMinFreq.Tag = cmbScalingMinFreq.Count - 1
+   ENDIF
 
    ' Sync Scaling Freqs. combos:
    cmbScalingSetSpeed.Index = cmbScalingSetSpeed.Tag
@@ -102,9 +118,12 @@ ENDIF
    ' FMain.cmbScalingMaxFreq.Index = FMain.cmbScalingMaxFreq.Find(Global.vCPUFreqMaxLimit)
    ' FMain.cmbScalingMinFreq.Index = FMain.cmbScalingMinFreq.Find(Global.vCPUFreqMinLimit)
    FMain.cmbAutoRefresh.Index = FMain.cmbAutoRefresh.Find(Global.vAutoRefreshRate)
-   FMain.chkSaveOnExit.Value = Global.vSaveOnExit
-   FMain.chkLoadOnStart.Value = Global.vLoadOnStart
-   FMain.chkLoadOnBoot.Value = Global.vCPUFreqLoad
+   IF Global.vLoadOnStart = 0 THEN 
+      FMain.cmbLoadOnBoot.Index = 1
+   ELSE 
+      FMain.cmbLoadOnBoot.Index = 0
+   ENDIF
+
 ELSE
    ' No scaling_driver:
    txtScalingDriver.Text = Global.vScalingDriver
@@ -117,46 +136,35 @@ ENDIF
 
 END
 
+
 PUBLIC SUB RefreshWindow()
 
 FMain.txtScalingDriver.Text = Global.vScalingDriver
 FMain.txtScalingGovernor.Text = Global.vScalingGov
 FMain.cmbScalingGovernor.Index = FMain.cmbScalingGovernor.Find(Global.vScalingGov)
-FMain.txtScalingSetSpeed.Text = Utils.AutoUnitsFreq(Global.vCPUFreq)
+Utils.CPUFreq_Refresh
 FMain.txtCPUMaxFreq.Text = Utils.AutoUnitsFreq(Global.vCPUFreqMax)
 FMain.txtCPUMinFreq.Text = Utils.AutoUnitsFreq(Global.vCPUFreqMin)
 FMain.txtScalingMaxFreq.Text = Utils.AutoUnitsFreq(Global.vCPUFreqMaxLimit)
 FMain.txtScalingMinFreq.Text = Utils.AutoUnitsFreq(Global.vCPUFreqMinLimit)
-
 END
 
-PUBLIC SUB butExit_Click()
-
-IF chkSaveOnExit.Value = TRUE THEN
-   Utils.WriteConfig
-ENDIF
-
-' bye bye...:
-ME.Close
-END
 
 PUBLIC SUB butRefresh_Click()
 
 FMain.txtNumCPUs.Text = Utils.CPUCount()
 Utils.GetConfig("cpu0")
 RefreshWindow
-
 END
 
+
 PUBLIC SUB cmbScalingGovernor_Click()
+DIM n AS Integer
 DIM CPUFreqPath AS String
 DIM retBool AS Boolean
 
 IF cmbScalingGovernor.Text <> "" AND cmbScalingGovernor.Text <> txtScalingGovernor.Text THEN
-   CPUFreqPath = Global.BasePath &/ "cpu0" &/ "cpufreq"
-   IF Global.root = TRUE THEN retBool = Utils.FileEchoLine(CPUFreqPath &/ "scaling_governor", cmbScalingGovernor.Text)
-   ' Get scaling_governor:
-   txtScalingGovernor.Text = Utils.FileReadLine(CPUFreqPath &/ "scaling_governor")
+   txtScalingGovernor.Text = Utils.setScalingGovernor(cmbScalingGovernor.Text)
    ' Check for scaling_governor change:
    IF txtScalingGovernor.Text <> cmbScalingGovernor.Text THEN
       message.Warning("Unable to set desired scaling governor..." & gb.NewLine & "try modprobing corresponding governor module:" & gb.NewLine & gb.NewLine & "# modprobe cpufreq_" & cmbScalingGovernor.Text)
@@ -165,7 +173,7 @@ IF cmbScalingGovernor.Text <> "" AND cmbScalingGovernor.Text <> txtScalingGovern
    cmbScalingGovernor.Index = cmbScalingGovernor.Find(txtScalingGovernor.Text)
    Global.vScalingGov = cmbScalingGovernor.Text
    ' Refresh scaling_cur_freq:
-   txtScalingSetSpeed.Text = Utils.AutoUnitsFreq(Utils.FileReadLine(CPUFreqPath &/ "scaling_cur_freq"))
+   Utils.CPUFreq_Refresh
    ' Check for set scaling speed availability:
    IF txtScalingGovernor.Text = "userspace" THEN
       IF Global.root = TRUE THEN cmbScalingSetSpeed.Enabled = TRUE
@@ -176,54 +184,31 @@ IF cmbScalingGovernor.Text <> "" AND cmbScalingGovernor.Text <> txtScalingGovern
 ENDIF
 END
 
-PUBLIC SUB cmbScalingSetSpeed_Click()
-DIM CPUFreqPath AS String
-DIM retBool AS Boolean
-DIM setSpeed AS Integer
 
-IF cmbScalingSetSpeed.Text <> txtScalingSetSpeed.Text THEN
-   CPUFreqPath = Global.BasePath &/ "cpu0" &/ "cpufreq"
-   setSpeed = Global.AvailableFreqs[cmbScalingSetSpeed.Index]
-   IF Global.root = TRUE THEN retBool = Utils.FileEchoLine(CPUFreqPath &/ "scaling_setspeed", setSpeed)
-   ' refresh scaling_cur_freq:
-   txtScalingSetSpeed.Text = Utils.AutoUnitsFreq(Utils.FileReadLine(CPUFreqPath &/ "scaling_cur_freq"))
-   Global.vCPUFreq = Utils.AutoUnitsFreqRev(txtScalingSetSpeed.Text)
+PUBLIC SUB cmbScalingSetSpeed_Click()
+
+IF cmbScalingSetSpeed.Enabled = TRUE THEN
+   Utils.setScalingSetSpeed(Global.AvailableFreqs[cmbScalingSetSpeed.Index])
 ENDIF
 END
+
 
 PUBLIC SUB cmbScalingMaxFreq_Click()
-DIM CPUFreqPath AS String
-DIM retBool AS Boolean
-DIM setSpeed AS Integer
 
 IF cmbScalingMaxFreq.Text <> txtScalingMaxFreq.Text THEN
-   CPUFreqPath = Global.BasePath &/ "cpu0" &/ "cpufreq"
-   setSpeed = Global.AvailableFreqs[cmbScalingMaxFreq.Index]
-   IF Global.root = TRUE THEN retBool = Utils.FileEchoLine(CPUFreqPath &/ "scaling_max_freq", setSpeed)
+   txtScalingMaxFreq.Text = Utils.setScalingMaxFreq(Global.AvailableFreqs[cmbScalingMaxFreq.Index])
    ' Refresh scaling_max_freq:
-   txtScalingMaxFreq.Text = Utils.AutoUnitsFreq(Utils.FileReadLine(CPUFreqPath &/ "scaling_max_freq"))
-   Global.vCPUFreqMaxLimit = Utils.AutoUnitsFreqRev(txtScalingMaxFreq.Text)
-   ' Refresh scaling_cur_freq:
-   txtScalingSetSpeed.Text = Utils.AutoUnitsFreq(Utils.FileReadLine(CPUFreqPath &/ "scaling_cur_freq"))
-   Global.vCPUFreq = Utils.AutoUnitsFreqRev(txtScalingSetSpeed.Text)
+   Utils.CPUFreq_Refresh
 ENDIF
 END
 
+
 PUBLIC SUB cmbScalingMinFreq_Click()
-DIM CPUFreqPath AS String
-DIM retBool AS Boolean
-DIM setSpeed AS Integer
 
 IF cmbScalingMinFreq.Text <> txtScalingMinFreq.Text THEN
-   CPUFreqPath = Global.BasePath &/ "cpu0" &/ "cpufreq"
-   setSpeed = Global.AvailableFreqs[cmbScalingMinFreq.Index]
-   IF Global.root = TRUE THEN retBool = Utils.FileEchoLine(CPUFreqPath &/ "scaling_min_freq", setSpeed)
+   txtScalingMinFreq.Text = Utils.setScalingMinFreq(Global.AvailableFreqs[cmbScalingMinFreq.Index])
    ' Refresh scaling_min_freq:
-   txtScalingMinFreq.Text = Utils.AutoUnitsFreq(Utils.FileReadLine(CPUFreqPath &/ "scaling_min_freq"))
-   Global.vCPUFreqMinLimit = Utils.AutoUnitsFreqRev(txtScalingMinFreq.Text)
-   ' Refresh scaling_cur_freq:
-   txtScalingSetSpeed.Text = Utils.AutoUnitsFreq(Utils.FileReadLine(CPUFreqPath &/ "scaling_cur_freq"))
-   Global.vCPUFreq = Utils.AutoUnitsFreqRev(txtScalingSetSpeed.Text)
+   Utils.CPUFreq_Refresh
 ENDIF
 END
 
@@ -270,8 +255,30 @@ ELSE
 ENDIF
 END
 
+
 PUBLIC SUB Timer1_Timer()
 
 butRefresh_Click
 
 END
+
+
+PUBLIC SUB Form_Close()
+
+Utils.WriteConfig
+' bye bye...:
+
+END
+
+
+PUBLIC SUB butExit_Click()
+
+Utils.WriteConfig
+
+' bye bye...:
+ME.Close
+
+END
+
+
+

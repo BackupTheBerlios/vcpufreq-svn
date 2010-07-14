@@ -7,6 +7,9 @@ Count=0
 [DebugWindow/System.User]
 Geometry=[0,0,258,258]
 
+[DebugWindow/hFile]
+Geometry=[0,0,301,301]
+
 [FFind]
 SearchIn="Project"
 CaseSensitive=False
@@ -15,14 +18,17 @@ SearchComment=False
 SearchString=True
 
 [OpenFile]
-File[1]="Utils.module:173.104"
-Active=1
-File[2]="Main.module:14.0"
-File[3]="FMain.class:65.37"
-File[4]="Global.class:15.46"
-File[5]="FMain.form"
+File[1]="FMain.form"
+File[2]="Main.module:0.0"
+File[3]="FMain.class:210.24"
+File[4]="Utils.module:332.0"
+Active=4
+File[5]="Global.class:19.23"
 Count=5
 
 [Watches]
-Count=0
+Count=3
+Watch[1]="filename"
+Watch[2]="sLine"
+Watch[3]="sTemp"
 

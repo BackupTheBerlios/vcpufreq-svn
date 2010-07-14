@@ -16,6 +16,53 @@ SHELL sTemp WAIT
 END
 
 
+PUBLIC FUNCTION CPUCount() AS Integer
+DIM CPUFreqPath AS String
+DIM vCPUCount AS Integer
+DIM element AS String
+DIM n AS Integer
+
+CPUFreqPath = Global.BasePath &/ "cpu0" &/ "cpufreq"
+' Reset CPU counter:
+vCPUCount = 0
+FOR EACH element IN Dir(Global.BasePath, "cpu*")
+   'Count CPUs:
+   IF IsInteger(Val(Right$(element))) = TRUE THEN
+      INC vCPUCount
+   ENDIF
+NEXT
+RETURN vCPUCount
+END
+
+
+PUBLIC FUNCTION CheckMultiCPUs() AS Boolean
+DIM CPUFreqPath AS String
+DIM arrAffectedCPUs AS String[]
+DIM vAffectedCPUs AS Integer
+
+CPUFreqPath = Global.BasePath &/ "cpu0" &/ "cpufreq"
+
+IF Global.vCPUCount > 1 THEN
+   ' Get affected_cpus:
+   arrAffectedCPUs = NEW String[]
+   arrAffectedCPUs.Clear
+   IF Exist(CPUFreqPath &/ "affected_cpus") THEN
+      TRY arrAffectedCPUs = Split(Utils.FileReadLine(CPUFreqPath &/ "affected_cpus"), " ", "")
+      IF ERROR THEN
+         Global.vCPUMulti = FALSE     'Assume no need for separate handling.
+         PRINT "Error reading: " & CPUFreqPath &/ "affected_cpus" & gb.NewLine & "Nothing else to do here, so I'll just exit..."
+         logMessage("Error reading: " & CPUFreqPath &/ "affected_cpus" & gb.NewLine & "Nothing else to do here, so I'll just exit...")
+      ENDIF
+      'Count AffectedCPUs:
+      IF Global.vCPUCount = arrAffectedCPUs.Count THEN 
+         RETURN FALSE     'No need for separate handling.
+      ELSE 
+         RETURN TRUE     'CPUs need separate handling. NOTE: might be CPU sets?
+      ENDIF 
+   ENDIF
+ENDIF
+END
+
 
 PUBLIC FUNCTION AutoUnitsFreq(clockfreq AS Integer) AS String
 DIM Temp AS Integer
@@ -80,9 +127,7 @@ IF Exist(Global.INIFIle) THEN
    Global.vCPUFreqMaxLimit = ReadIni("Setting.CPUFreqMaxLimit", "")
    Global.vCPUFreqMinLimit = ReadIni("Setting.CPUFreqMinLimit", "")
    Global.vAutoRefreshRate = ReadIni("Setting.AutoRefreshRate", "manual")
-   Global.vSaveOnExit = ReadIni("Setting.SaveOnExit", 0)
    Global.vLoadOnStart = ReadIni("Setting.LoadOnStart", 0)
-   Global.vCPUFreqLoad = ReadIni("Setting.CPUFreqLoad", 0)
 ELSE 
    Global.vCPUFreqConfExists = FALSE
    PRINT "vcpufreq-loader could not find vcpufreq config file..."
@@ -94,6 +139,7 @@ END
 
 PUBLIC SUB SetConfig()
 ' Set config to hardware:
+DIM n AS Integer
 DIM CPUFreqPath AS String
 DIM retBool AS Boolean
 DIM strTemp AS String
@@ -102,34 +148,57 @@ CPUFreqPath = Global.BasePath &/ "cpu0" &/ "cpufreq"
 PRINT "CPUFreqPath: " & CPUFreqPath
 logMessage("CPUFreqPath: " & CPUFreqPath)
 
+'Get number of CPUs:
+Global.vCPUCount = Utils.CPUCount()
+
+'Check for MultiCPUs handling:
+Global.vCPUMulti = Utils.CheckMultiCPUs()
+
 ' Set scaling governor:
-retBool = Utils.FileEchoLine(CPUFreqPath &/ "scaling_governor", Global.vScalingGov)
-' Get scaling_governor:
-strTemp = Utils.FileReadLine(CPUFreqPath &/ "scaling_governor")
-' Check for scaling_governor change:
-IF strTemp <> Global.vScalingGov THEN
-   PRINT "Unable to set desired scaling governor..." & gb.NewLine & "try modprobing corresponding governor module:" & gb.NewLine & gb.NewLine & "# modprobe cpufreq_" & Global.vScalingGov
-   logMessage("Unable to set desired scaling governor..." & gb.NewLine & "try modprobing corresponding governor module:" & gb.NewLine & gb.NewLine & "# modprobe cpufreq_" & Global.vScalingGov)
-ENDIF
-PRINT "Set scaling governor: " & Global.vScalingGov
-logMessage("Set scaling governor: " & Global.vScalingGov)
+FOR n = 0 TO Global.vCPUCount - 1
+   CPUFreqPath = Global.BasePath &/ "cpu" & n &/ "cpufreq"
+   retBool = Utils.FileEchoLine(CPUFreqPath &/ "scaling_governor", Global.vScalingGov)
+   ' Get scaling_governor:
+   strTemp = Utils.FileReadLine(CPUFreqPath &/ "scaling_governor")
+   ' Check for scaling_governor change:
+   IF strTemp <> Global.vScalingGov THEN
+      PRINT "Unable to set desired scaling governor..." & gb.NewLine & "try modprobing corresponding governor module:" & gb.NewLine & gb.NewLine & "# modprobe cpufreq_" & Global.vScalingGov
+      logMessage("Unable to set desired scaling governor..." & gb.NewLine & "try modprobing corresponding governor module:" & gb.NewLine & gb.NewLine & "# modprobe cpufreq_" & Global.vScalingGov)
+   ENDIF
+   PRINT "Set scaling governor CPU" & n & ": " & Global.vScalingGov 
+   logMessage("Set scaling governor CPU" & n & ": " & Global.vScalingGov)
+
+   IF Global.vCPUMulti = FALSE THEN BREAK
+NEXT 'n
 
 IF Global.vScalingGov = "userspace" THEN
 ' Set scaling speed:
-   retBool = Utils.FileEchoLine(CPUFreqPath &/ "scaling_setspeed", Global.vCPUFreq)
-   PRINT "Set scaling speed: " & Global.vCPUFreq & " (" & AutoUnitsFreq(Global.vCPUFreq) & ")"
-   logMessage("Set scaling speed: " & Global.vCPUFreq)
+   FOR n = 0 TO Global.vCPUCount - 1
+      CPUFreqPath = Global.BasePath &/ "cpu" & n &/ "cpufreq"
+      retBool = Utils.FileEchoLine(CPUFreqPath &/ "scaling_setspeed", Global.vCPUFreq)
+      PRINT "Set scaling speed CPU" & n & ": " & Global.vCPUFreq & " (" & AutoUnitsFreq(Global.vCPUFreq) & ")"
+      logMessage("Set scaling speed CPU" & n & ": " & Global.vCPUFreq)
+      IF Global.vCPUMulti = FALSE THEN BREAK
+   NEXT 'n
 ENDIF
 
 ' Set scaling max freq.:
-retBool = Utils.FileEchoLine(CPUFreqPath &/ "scaling_max_freq", Global.vCPUFreqMaxLimit)
-PRINT "Set scaling max freq.: " & Global.vCPUFreqMaxLimit & " (" & AutoUnitsFreq(Global.vCPUFreqMaxLimit) & ")"
-logMessage("Set scaling max freq.: " & Global.vCPUFreqMaxLimit)
+FOR n = 0 TO Global.vCPUCount - 1
+   CPUFreqPath = Global.BasePath &/ "cpu" & n &/ "cpufreq"
+   retBool = Utils.FileEchoLine(CPUFreqPath &/ "scaling_max_freq", Global.vCPUFreqMaxLimit)
+   PRINT "Set scaling max freq. CPU" & n & ": " & Global.vCPUFreqMaxLimit & " (" & AutoUnitsFreq(Global.vCPUFreqMaxLimit) & ")"
+   logMessage("Set scaling max freq. CPU" & n & ": " & Global.vCPUFreqMaxLimit)
+   IF Global.vCPUMulti = FALSE THEN BREAK
+NEXT 'n
 
 ' Set scaling min freq.:
-retBool = Utils.FileEchoLine(CPUFreqPath &/ "scaling_min_freq", Global.vCPUFreqMinLimit)
-PRINT "Set scaling min freq.: " & Global.vCPUFreqMinLimit & " (" & AutoUnitsFreq(Global.vCPUFreqMinLimit) & ")"
-logMessage("Set scaling min freq.: " & Global.vCPUFreqMinLimit)
+FOR n = 0 TO Global.vCPUCount - 1
+   CPUFreqPath = Global.BasePath &/ "cpu" & n &/ "cpufreq"
+   retBool = Utils.FileEchoLine(CPUFreqPath &/ "scaling_min_freq", Global.vCPUFreqMinLimit)
+   PRINT "Set scaling min freq. CPU" & n & ": " & Global.vCPUFreqMinLimit & " (" & AutoUnitsFreq(Global.vCPUFreqMinLimit) & ")"
+   logMessage("Set scaling min freq. CPU" & n & ": " & Global.vCPUFreqMinLimit)
+   IF Global.vCPUMulti = FALSE THEN BREAK
+NEXT 'n
 
 END
 

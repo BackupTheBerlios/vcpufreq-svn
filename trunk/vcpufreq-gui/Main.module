@@ -35,9 +35,7 @@ ELSE
    FMain.cmbScalingSetSpeed.Enabled = TRUE
    FMain.cmbScalingMaxFreq.Enabled = TRUE
    FMain.cmbScalingMinFreq.Enabled = TRUE
-   FMain.chkSaveOnExit.Enabled = TRUE
-   FMain.chkLoadOnStart.Enabled = TRUE
-   FMain.chkLoadOnBoot.Enabled = TRUE
+   FMain.cmbLoadOnBoot.Enabled = TRUE
    FMain.cmbAutoRefresh.Enabled = TRUE
 ENDIF
 

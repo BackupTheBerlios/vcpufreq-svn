@@ -1,194 +1,202 @@
 # Gambas Form File 2.0
 
 { Form Form
-  MoveScaled(40,32.1429,67.1429,42.7143)
-  Font = Font["Luxi Sans,10"]
-  Text = ("cpu-freq")
+  Move(320,257,400,304)
+  #(Scaled) = False
+  Font = Font["10"]
+  Text = ("vcpufreq")
   Icon = Picture["kcmprocessor.png"]
   Border = Window.Fixed
   Spacing = 5
-  { Panel1 Panel
-    MoveScaled(0,0,67.2857,30.5714)
-    Border = Border.Etched
-    { Label2 Label
-      MoveScaled(44.5714,1.2857,8.5714,3.2857)
-      Text = ("CPUs:")
-      Alignment = Align.Right
-    }
-    { Label3 Label
-      MoveScaled(1.2857,9.2857,18.5714,3.4286)
-      Text = ("CPU frequency:")
-      Alignment = Align.Right
-    }
+  { Frame2 Frame
+    Move(0,0,232,248)
+    Font = Font["10"]
+    Text = ("Configuration:")
     { Label6 Label
-      MoveScaled(1.2857,21.2857,18.5714,3.4286)
-      Text = ("Max. cpufreq limit:")
+      Move(8,152,96,24)
+      Font = Font["10"]
+      Text = ("Max freq. limit:")
       Alignment = Align.Right
     }
     { Label7 Label
-      MoveScaled(1.2857,25.2857,18.5714,3.4286)
-      Text = ("Min. cpufreq limit:")
+      Move(8,184,96,24)
+      Font = Font["10"]
+      Text = ("Min freq. limit:")
       Alignment = Align.Right
-    }
-    { txtScalingSetSpeed TextBox
-      MoveScaled(20.5714,9.2857,22.1429,3.4286)
-      ToolTip = ("current CPU clock frequency")
-      Text = ("")
-      Alignment = Align.Right
-      ReadOnly = True
     }
     { txtCPUMaxFreq TextBox
-      MoveScaled(20.5714,13.2857,22.1429,3.4286)
+      Move(112,88,112,24)
+      Font = Font["10"]
+      Background = &HBFFFBF&
       ToolTip = ("max. clock freq. supported by CPU")
       Text = ("")
-      Alignment = Align.Right
+      Alignment = Align.Left
       ReadOnly = True
     }
     { txtCPUMinFreq TextBox
-      MoveScaled(20.5714,17.2857,22.1429,3.4286)
+      Move(112,120,112,24)
+      Font = Font["10"]
+      Background = &HBFFFBF&
       ToolTip = ("min. clock freq. supported by CPU")
       Text = ("")
-      Alignment = Align.Right
-      ReadOnly = True
-    }
-    { cmbScalingSetSpeed ComboBox
-      MoveScaled(44,9.2857,22.1429,3.4286)
-      Enabled = False
-      ToolTip = ("set CPU clock frequency")
-      Text = ("")
-      ReadOnly = True
-    }
-    { cmbScalingMaxFreq ComboBox
-      MoveScaled(44,21.2857,22.1429,3.4286)
-      Enabled = False
-      ToolTip = ("set max limit for cpufreq scaling")
-      Text = ("")
-      ReadOnly = True
-    }
-    { cmbScalingMinFreq ComboBox
-      MoveScaled(44,25.2857,22.1429,3.4286)
-      Enabled = False
-      ToolTip = ("set min limit for cpufreq scaling")
-      Text = ("")
+      Alignment = Align.Left
       ReadOnly = True
     }
     { Label8 Label
-      MoveScaled(1.2857,5.2857,18.5714,3.4286)
-      Text = ("cpufreq governor:")
+      Move(8,56,80,24)
+      Font = Font["10"]
+      Text = ("Governor:")
       Alignment = Align.Right
     }
     { txtScalingGovernor TextBox
-      MoveScaled(20.5714,5.2857,22.1429,3.4286)
+      Move(96,56,128,24)
       ToolTip = ("current cpufreq governor policy")
       Text = ("")
       ReadOnly = True
     }
     { cmbScalingGovernor ComboBox
-      MoveScaled(44,5.2857,22.1429,3.4286)
+      Move(96,56,128,24)
       Enabled = False
+      Font = Font["10"]
       ToolTip = ("set cpufreq governor policy")
       Text = ("")
       ReadOnly = True
     }
     { Label10 Label
-      MoveScaled(1.2857,1.2857,18.5714,3.4286)
-      Text = ("cpufreq driver:")
+      Move(8,24,80,24)
+      Font = Font["10"]
+      Text = ("Driver:")
       Alignment = Align.Right
     }
     { txtScalingDriver TextBox
-      MoveScaled(20.5714,1.2857,22.1429,3.4286)
+      Move(96,24,128,24)
+      Font = Font["10"]
+      Background = &HBFFFBF&
       ToolTip = ("cpufreq driver in use")
       Text = ("")
+      Alignment = Align.Left
       ReadOnly = True
     }
     { txtScalingMaxFreq TextBox
-      MoveScaled(20.5714,21.2857,22.1429,3.4286)
+      Move(112,152,112,24)
       ToolTip = ("max limit set for cpufreq scaling")
       Text = ("")
       Alignment = Align.Right
       ReadOnly = True
     }
     { txtScalingMinFreq TextBox
-      MoveScaled(20.5714,25.2857,22.1429,3.4286)
+      Move(112,184,112,24)
       ToolTip = ("min limit set for cpufreq scaling")
       Text = ("")
       Alignment = Align.Right
       ReadOnly = True
     }
+    { Label4 Label
+      Move(8,88,96,24)
+      Font = Font["10"]
+      Text = ("Max CPU freq:")
+      Alignment = Align.Right
+    }
+    { Label5 Label
+      Move(8,120,96,24)
+      Font = Font["10"]
+      Text = ("Min CPU freq:")
+      Alignment = Align.Right
+    }
+    { cmbScalingMaxFreq ComboBox
+      Move(112,152,112,24)
+      Enabled = False
+      Font = Font["10"]
+      ToolTip = ("set max limit for cpufreq scaling")
+      Text = ("")
+      ReadOnly = True
+    }
+    { cmbScalingMinFreq ComboBox
+      Move(112,184,112,24)
+      Enabled = False
+      Font = Font["10"]
+      ToolTip = ("set min limit for cpufreq scaling")
+      Text = ("")
+      ReadOnly = True
+    }
+    { Label1 Label
+      Move(8,216,96,24)
+      Font = Font["10"]
+      Text = ("Load on boot:")
+      Alignment = Align.Right
+    }
+    { cmbLoadOnBoot ComboBox
+      Move(112,216,112,24)
+      Enabled = False
+      Font = Font["10"]
+      ToolTip = ("enable/disable frequency setting on boot")
+      Text = ("")
+      ReadOnly = True
+      List = [("Enabled"), ("Disabled")]
+    }
+  }
+  { Frame3 Frame
+    Move(232,0,168,248)
+    Font = Font["10"]
+    Text = ("Current frequency:")
+    { GridView1 GridView
+      Move(8,24,152,216)
+      Font = Font["10"]
+      ToolTip = ("current CPU frequency table")
+      Scrollbar = Scroll.Vertical
+      Resizable = False
+    }
+  }
+  { Frame4 Frame
+    Move(0,248,232,56)
+    Font = Font["10"]
+    Text = ("CPU settings:")
+    { Label2 Label
+      Move(8,24,48,24)
+      Font = Font["10"]
+      Text = ("CPUs:")
+      Alignment = Align.Right
+    }
     { txtNumCPUs TextBox
-      MoveScaled(54.5714,1.2857,10.5714,3.2857)
+      Move(64,24,40,24)
+      Font = Font["10"]
+      Background = &HBFFFBF&
       ToolTip = ("number of active CPUs")
       Text = ("")
       Alignment = Align.Right
       ReadOnly = True
     }
-    { Timer1 #Timer
-      #X = 308
-      #Y = 98
+    { cmbScalingSetSpeed ComboBox
+      Move(112,24,112,24)
+      Enabled = False
+      Font = Font["10"]
+      ToolTip = ("set CPU clock frequency")
+      Text = ("")
+      ReadOnly = True
     }
   }
-  { Panel2 Panel
-    MoveScaled(0,36,67.2857,6.5714)
-    Border = Border.Etched
-    { butRefresh Button
-      MoveScaled(46.5714,0.5714,9.2857,5.2857)
-      ToolTip = ("manually refresh cpu-freq info")
-      Text = ("Refresh")
-    }
+  { Frame5 Frame
+    Move(232,248,168,56)
+    Font = Font["10"]
+    Text = ("Refresh view:")
     { cmbAutoRefresh ComboBox
-      MoveScaled(20.5714,1.2857,22,4)
+      Move(8,24,80,24)
       Enabled = False
+      Font = Font["10"]
       ToolTip = ("Set auto-refresh update interval or manual refresh")
       Text = ("")
       ReadOnly = True
       List = [("manual"), ("1 sec."), ("2 sec."), ("5 sec."), ("10 sec."), ("15 sec."), ("20 sec."), ("30 sec."), ("1 min."), ("5 min.")]
     }
-    { Label1 Label
-      MoveScaled(1.2857,1.2857,18.5714,4)
-      Text = ("Auto-refresh rate:")
-      Alignment = Align.Right
-    }
-    { butExit Button
-      MoveScaled(56.5714,0.5714,9.2857,5.2857)
-      ToolTip = ("exit cpu-freq utility")
-      Text = ("Exit")
+    { butRefresh Button
+      Move(96,16,64,32)
+      Font = Font["10"]
+      ToolTip = ("manually refresh cpu-freq info")
+      Text = ("Now")
     }
   }
-  { Label4 Label
-    MoveScaled(1.2857,13.2857,18.5714,3.4286)
-    Text = ("Max. CPU freq.:")
-    Alignment = Align.Right
-  }
-  { Label5 Label
-    MoveScaled(1.2857,17.2857,18.5714,3.4286)
-    Text = ("Min. CPU freq.:")
-    Alignment = Align.Right
-  }
-  { Panel3 Panel
-    MoveScaled(0,30.5714,67.2857,5.2857)
-    Border = Border.Etched
-    { chkSaveOnExit CheckBox
-      MoveScaled(14,0.5714,17.2857,4)
-      Enabled = False
-      ToolTip = ("Save vcpufreq configuration on application exit")
-      Text = ("Save on exit")
-    }
-    { chkLoadOnStart CheckBox
-      MoveScaled(31.2857,0.5714,17.2857,4)
-      Enabled = False
-      ToolTip = ("Load vcpufreq configuration on next application start")
-      Text = ("Load on start")
-    }
-    { chkLoadOnBoot CheckBox
-      MoveScaled(48.5714,0.5714,17.2857,4)
-      Enabled = False
-      ToolTip = ("Set vcpufreq-load utility to run on system startup")
-      Text = ("Load on boot")
-    }
-    { Label9 Label
-      MoveScaled(0.5714,0.5714,10.5714,4)
-      Text = ("Config:")
-      Alignment = Align.Right
-    }
+  { Timer1 #Timer
+    #X = 344
+    #Y = 200
   }
 }

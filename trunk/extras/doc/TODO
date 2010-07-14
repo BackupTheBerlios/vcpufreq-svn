@@ -1,3 +1,4 @@
+TODO - Add System Tray icon with menu and  current CPU freq. on mouseover.
 TODO - Update man page for Gambas2
 TODO - Add error checking after setting scaling_setspeed in Utils.SetConfig
 TODO - Add error checking after setting scaling_max_freq in Utils.SetConfig

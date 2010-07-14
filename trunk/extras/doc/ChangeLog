@@ -1,3 +1,49 @@
+2010-07-06   <joe1962@users.berlios.de>
+
+	* Released 2.4.2
+
+2010-07-06   <joe1962@users.berlios.de>
+
+	* BUG: CPUFreq_Refresh() only updated gridview for CPU0 when others "affected"
+
+2010-07-05   <joe1962@users.berlios.de>
+
+	* Released 2.4.1
+
+2010-07-05   <joe1962@users.berlios.de>
+
+	* BUG: CPUFreq_Refresh() did not update gridview for single CPU/core
+
+2010-06-30   <joe1962@users.berlios.de>
+
+	* Released 2.4.0
+
+2010-06-30   <joe1962@users.berlios.de>
+
+	* Always save settings on exit
+	* Removed "Save on exit" setting and related cleanup
+	* Extensive GUI restructuring for compactness
+	* Light green background for info-only textboxes
+	* Replaced per-CPU freq. textboxes by a dynamically-generated grid
+
+2010-04-15   <joe1962@users.berlios.de>
+
+	* Released 2.2.1
+
+2010-04-15   <joe1962@users.berlios.de>
+
+	* Fixed wrong ini file variable checked by vcpufreq-loader on start
+
+2010-01-27   <joe1962@users.berlios.de>
+
+	* Released 2.2.0
+
+2010-01-27   <joe1962@users.berlios.de>
+
+	* Fixed multi-CPU / multi-core code.
+	* Extensive refactoring, code simplification
+	* Fixed checkboxes config settings read/write
+
 2009-01-15   <joe1962@users.berlios.de>
 
 	* Released 2.0.2

@@ -8,14 +8,16 @@ STATIC PUBLIC root AS Boolean
 
 'STATIC PUBLIC BasePath AS String
 STATIC PUBLIC LinkedFreq AS Boolean
-STATIC PUBLIC numCPUs AS Integer
 
 ' Config. load arrays:
 STATIC PUBLIC AvailableGovs AS String[]
 STATIC PUBLIC AvailableFreqs AS String[]
 STATIC PUBLIC AvailableFreqsPretty AS String[]
+STATIC PUBLIC txtScalingSetSpeed AS String[]
 
 ' Config. load vars:
+STATIC PUBLIC vCPUCount AS Integer     'Holds count of CPUs/cores/HTs.
+STATIC PUBLIC vCPUMulti AS Boolean     'If TRUE, need to handle CPUs separately.
 STATIC PUBLIC vScalingDriver AS String
 STATIC PUBLIC vScalingGov AS String
 STATIC PUBLIC vCPUFreq AS Integer
@@ -26,4 +28,4 @@ STATIC PUBLIC vCPUFreqMinLimit AS Integer
 STATIC PUBLIC vAutoRefreshRate AS String
 STATIC PUBLIC vSaveOnExit AS Boolean
 STATIC PUBLIC vLoadOnStart AS Boolean
-STATIC PUBLIC vCPUFreqLoad AS Boolean
+

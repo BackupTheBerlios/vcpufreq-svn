@@ -1,10 +1,14 @@
-.TH "vcpufreq" "1" "1.0.4" "José J. Rodríguez" ""
+.TH "vcpufreq" "1" "2.2.0" "José J. Rodríguez" ""
 .SH "NAME"
 .LP 
 \fBvcpufreq\fR \- A graphical CPU frequency selector written in Gambas
-.SH "SYNTAX"
+.SH "SYNTAX (full)"
 .LP 
-gbx \-x /usr/bin/vcpufreq
+gbx \-x /usr/bin/vcpufreq.gambas
+
+.SH "SYNTAX (short)"
+.LP 
+vcpufreq.gambas
 
 .SH "DESCRIPTION"
 .LP 
@@ -17,8 +21,8 @@ The CPUfreq subsystem is available by default in the Linux 2.6.x series kernels.
 \fBvcpufreq\fR is written entirely using Benoît Minisini's Gambas programming language, thus it requires the Gambas Runtime environment to function. It was created with the VectorLinux GNU/Linux distribution in mind, however it will function with any other distribution as long as the necessary dependencies are installed.
 .br 
 
-\fBvcpufreq\fR can be broken down into two essential components: \fIvcpufreq\-gui\fR and \fIvcpufreq\-loader\fR.
-\fIvcpufreq\-gui\fR provides the actual graphical interface that allows a user to interact with the CPUfreq subsystem, while \fIvcpufreq\-loader\fR is a command\-line tool designed primarily to load (and set) the saved CPUfreq configuration at boot time.
+\fBvcpufreq\fR can be broken down into two essential components: \fIvcpufreq\fR and \fIvcpufreq\-loader\fR.
+\fIvcpufreq\fR provides the actual graphical interface that allows a user to interact with the CPUfreq subsystem, while \fIvcpufreq\-loader\fR is a command\-line tool designed primarily to load (and set) the saved CPUfreq configuration at boot time.
 
 \fBvcpufreq\fR is NOT an overclocking tool!
 
@@ -27,26 +31,12 @@ The CPUfreq subsystem is available by default in the Linux 2.6.x series kernels.
 \fBvcpufreq\fR has a very straight\-forward and easy to understand layout.
 .br 
 
-If you attempt to run \fBvcpufreq\fR as a regular user, it will start up in read\-only mode and you will not be able to use any of the buttons or drop\-down menues from the combo\-boxes.
+If you attempt to run \fBvcpufreq\fR as a regular user, it will run itself with kdesu or gksu if available.
 .br 
-Make sure you start \fBvcpufreq\fR as a root user, either by means of the \fIsu\fR or \fIsudo\fR command called at a terminal emulator, or using a graphical authentication utility such as \fIgksu\fR,\fIkdesu\fR or \fIgksudo\fR.
 
+Please make sure that the Gambas interpreter (\fIgbx\fR) is in your path. On most systems with a properly installed Gambas runtime, there is no need to use the full command\-line, simply running "vcpufreq.gambas" should call the Gambas runtime interpreter. The path to \fBvcpufreq\fR  may also vary, depending on where your distribution places user\-accessable binaries, in Vector Linux, it defaults to /usr/bin/.
 
-\fBExample:\fR
-
-	\-If you are using a terminal emulator:
-
-	$ su \-c "gbx \-x /usr/bin/vcpufreq"
-
-	\-If you wish to run \fBvcpufreq\fR from application
-.br 
-	launchers (menu or desktop items):
-
-	gksu "gbx \-x /usr/bin/vcpufreq"
-
-Please make sure that the Gambas interpreter (\fIgbx\fR) is in your path. On most systems with a properly installed Gambas runtime, there is no need to use the full command\-line, simply running "vcpufreq" should call the Gambas runtime interpreter. The path to \fBvcpufreq\fR  may also vary, depending on where your distribution places user\-accessable binaries, in Vector Linux, it defaults to /usr/bin/.
-
-Once you start \fBvcpufreq\fR with proper root privilages, you will be presented with a simple and clean interface, supported by tooltips, with logically organized items regarding you processor's frequency scaling options and information.
+Once you start \fBvcpufreq\fR, you will be presented with a simple and clean interface, supported by tooltips, with logically organized items regarding your processor's frequency scaling options and information.
 
 
 \fBvcpufreq's\fR interface explained:
@@ -68,8 +58,6 @@ Once you start \fBvcpufreq\fR with proper root privilages, you will be presented
 	\fB\- Min. cpufreq limit:\fR change your processor's minimum selectable frequency to a value within the list of available frequencies supported by your CPU.
 
 	\fB\- Save on exit:\fR select this option to save the adjustments you made with \fBvcpufreq\fR when you exit. The information will be saved to \fI/etc/vcpufreq.conf\fR.
-
-	\fB\- Load on start:\fR check this box if you want the information saved from the last session to be loaded (and set) when \fBvcpufreq\fR starts.
 
 	\fB\- Load on boot:\fR check this box if you wish \fBvcpufreq\-loader\fR to load the last saved parameters automaticaly when you boot your computer.
 
@@ -109,6 +97,6 @@ Below is an assortment of links and info that may be useful:
 
 .SH "AUTHORS"
 .LP 
-\fBvcpufreq:\fR José J. Rodríguez (Joe1962) <joe1962@gmail.com>
+\fBvcpufreq:\fR José J. Rodríguez (Joe1962) <joe1962@users.berlios.de>
 
 \fBmanual page:\fR Eugéne Suter (easuter) <easuter@gmail.com>

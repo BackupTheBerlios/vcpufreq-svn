@@ -7,15 +7,15 @@ Count=0
 [FFind]
 SearchIn="Project"
 CaseSensitive=False
-SearchWord=True
+SearchWord=False
 SearchComment=False
 SearchString=True
 
 [OpenFile]
-File[1]="Utils.module:90.0"
+File[1]="Utils.module:134.6"
 Active=1
-File[2]="Global.class:13.0"
-File[3]="Main.module:10.6"
+File[2]="Global.class:23.0"
+File[3]="Main.module:24.0"
 Count=3
 
 [Watches]
