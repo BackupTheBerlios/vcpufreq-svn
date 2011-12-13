@@ -4,15 +4,20 @@ PUBLIC SUB Main()
 DIM Ret AS String
 
 IF System.User.Id <> 0 THEN
-   EXEC ["which", "gksu"] TO Ret
-   IF InStr(Ret, "gksu") THEN
-      EXEC ["gksu", Application.Path &/ "vcpufreq.gambas"]
+   EXEC ["which", "kdesu"] TO Ret
+   IF InStr(Ret, "kdesu") THEN
+      EXEC ["kdesu", Application.Path &/ "vcpufreq.gambas"]
    ELSE
-      EXEC ["which", "kdesu"] TO Ret
-      IF InStr(Ret, "kdesu") THEN
-         EXEC ["kdesu", Application.Path &/ "vcpufreq.gambas"]
+      EXEC ["which", "ktsuss"] TO Ret
+      IF InStr(Ret, "ktsuss") THEN
+         EXEC ["ktsuss", Application.Path &/ "vcpufreq.gambas"]
       ELSE
-         PRINT "No gksu or kdesu available (try vcpufreq in a root terminal)..."
+         EXEC ["which", "gksu"] TO Ret
+         IF InStr(Ret, "gksu") THEN
+            EXEC ["gksu", Application.Path &/ "vcpufreq.gambas"]
+         ELSE
+            PRINT "No gksu or kdesu available (try vcpufreq in a root terminal)..."
+         ENDIF
       ENDIF
    ENDIF
    QUIT
